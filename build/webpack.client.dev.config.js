@@ -1,19 +1,20 @@
 const path = require('path')
-const webpack = require('webpack')
-const nodeExternals = require('webpack-node-externals')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const merge = require('webpack-merge')
+const baseConfig = require('./webpack.base.dev.config')
 require('dotenv').config()
 
-const { APP_ENV = 'production', APP_NAME = 'Default App Name' } = process.env
+const { APP_NAME = 'Default App Name' } = process.env
 
-let devMode = APP_ENV !== 'production'
-
-module.exports = {
-  mode: APP_ENV,
-  entry: {
-    main: './src/client/index.ts',
-  },
+let devMode = baseConfig.mode !== 'production'
+// console.log(baseConfig)
+module.exports = merge(baseConfig, {
+  entry: [
+    // 'webpack-hot-middleware/client?reload=true&path=__webpack_hmr',
+    'webpack-hot-middleware/client?reload=true',
+    './src/client/index.ts'
+  ],
   output: {
     path: path.join(__dirname, '../', 'dist', 'public'),
     publicPath: '/',
@@ -21,24 +22,25 @@ module.exports = {
   },
   target: 'web',
   devtool: devMode ? '#source-map' : false,
-  stats: {
-    // decrease noise in build output
-    children: false,
-  },
+  // devServer: {
+  //   contentBase: path.join(__dirname, 'dist'),
+  //   compress: true,
+  //   port: 9000
+  // },
+
+  // devServer: {
+  //   contentBase: path.join(__dirname, 'dist'),
+  //   watchContentBase: true,
+  //   hot: true,
+  // },
+
+  // devServer: {
+  //   contentBase: path.resolve(__dirname, 'src', 'client'),
+  //   publicPath: path.resolve(__dirname, 'dist', 'public'),
+  // },
+
   module: {
     rules: [
-      // Vanilla JavaScript option
-        // {
-        //   test: /\.js$/,
-        //   exclude: /node_modules/,
-        //   use: [
-        //     {
-        //       loader: 'babel-loader',
-        //     },
-        //   ],
-        // },
-
-    //   TypeScript Option
       {
         test: /\.tsx?$/,
         loader: 'babel-loader',
@@ -49,33 +51,9 @@ module.exports = {
         enforce: 'pre',
       },
 
-      // plain HTML
-      //   {
-      //     test: /\.html$/,
-      //     exclude: /node_modules/,
-      //     use: [
-      //       {
-      //         loader: 'html-loader',
-      //         options: { minimize: true },
-      //       },
-      //     ],
-      //   },
-
-      // Pug Templating
-      {
-        test: /\.pug$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: 'pug-loader',
-          },
-        ],
-      },
-
       // Stylesheets
       {
         test: /\.(sa|sc|c)ss$/,
-        exclude: /node_modules/,
         use: [
           {
             loader: devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
@@ -93,7 +71,6 @@ module.exports = {
       },
       {
         test: /\.styl$/,
-        exclude: /node_modules/,
         use: [
           {
             loader: devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
@@ -109,11 +86,21 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.pug$/,
+        use: [
+          {
+            loader: 'raw-loader',
+          },
+          {
+            loader: 'pug-plain-loader',
+          },
+        ],
+      },
 
       // Images
       {
         test: /\.(png|svg|jpg|gif)$/,
-        exclude: /node_modules/,
         use: [
           {
             loader: 'file-loader',
@@ -124,8 +111,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebPackPlugin({
-      template: '!!pug-loader!./src/client/index.pug',
-      production: APP_ENV === 'production',
+      template: './src/client/index.pug',
+      filename: 'index.html',
       // global variables available within pug templates
       templateParameters: {
         APP_NAME,
@@ -136,4 +123,4 @@ module.exports = {
       chunkFilename: devMode ? '[id].css' : '[id].[hash].css',
     }),
   ],
-}
+})
