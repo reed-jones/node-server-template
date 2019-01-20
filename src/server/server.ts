@@ -1,8 +1,8 @@
 import '@babel/polyfill'
-import Koa from 'koa'
 import router from '@server/routes'
+import Koa from 'koa'
 
-import { staticFiles, enableHMR } from './middleware'
+import { enableHMR, staticFiles } from './middleware'
 
 const {
   APP_ENV = 'production',
@@ -11,9 +11,9 @@ const {
   APP_URL = 'http://localhost',
 } = process.env
 
-let server = async () => {
-
+const server = async () => {
   const app = new Koa()
+
   if (APP_ENV !== 'production' && ['true', true].includes(APP_HMR)) {
     enableHMR(app)
   }
@@ -24,8 +24,13 @@ let server = async () => {
   // koa-router middleware
   app.use(router.routes())
   app.use(router.allowedMethods())
+
   // listen on port
   app.listen(APP_PORT)
-  console.log(`Now listening on port: ${APP_URL}:${APP_PORT}`)
+
+  if (APP_ENV !== 'production') {
+    // tslint:disable-next-line:no-console
+    console.log(`Now listening on port: ${APP_URL}:${APP_PORT}`)
+  }
 }
 server()

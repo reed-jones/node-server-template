@@ -1,5 +1,5 @@
-export type staticFileOptions = {
-  index?: string;
-  root?: string;
-  debug?: boolean;
+export interface IStaticFileOptions {
+  debug?: boolean
+  index?: string
+  root?: string
 }

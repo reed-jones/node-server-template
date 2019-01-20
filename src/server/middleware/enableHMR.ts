@@ -13,7 +13,7 @@ export default async (app: Koa<any, {}>) => {
       const filename = path.resolve(webpackConfig.output.path, 'index.html')
       ctx.response.type = 'text/event-stream'
       ctx.response.body = koaMiddleware.devMiddleware.fileSystem.createReadStream(
-        filename
+        filename,
       )
     }
   }

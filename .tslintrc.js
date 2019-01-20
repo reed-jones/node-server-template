@@ -2,7 +2,14 @@ module.exports = {
   defaultSeverity: 'error',
   extends: ['tslint:latest'],
   jsRules: {},
-  rules: {},
+  rules: {
+    semicolon: [true, 'never'],
+    quotemark: [true, 'single', 'backtick'],
+    'no-submodule-imports': {
+      options: [true, '@server'],
+    },
+    'no-implicit-dependencies': [true, ['@', '@server', '@client']],
+  },
   rulesDirectory: [],
   linterOptions: {
     exclude: ['**/node_modules/**'],
