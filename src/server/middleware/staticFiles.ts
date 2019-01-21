@@ -13,7 +13,15 @@ export default (opts: IStaticFileOptions = {}) => async (ctx: Koa.Context, next:
 
   await next()
 
-  if ((ctx.method !== 'GET' && ctx.method !== 'HEAD') || ctx.body !== null || ctx.status !== 404) {
+  if (ctx.method !== 'GET' && ctx.method !== 'HEAD') {
+    if (opts.debug) {
+      // tslint:disable-next-line:no-console
+      console.log(`Serving API Request ${ctx.method}: ${ctx.url}`)
+    }
+    return
+  }
+
+  if (ctx.body !== null || ctx.status !== 404) {
     if (opts.debug) {
       // tslint:disable-next-line:no-console
       console.log(`Serving API Request ${ctx.method}: ${ctx.url}`)

@@ -3,6 +3,7 @@
         | Name:
         input(v-model="name" type="text")
         h1 Helo Component!
+        p links:
         .top-right.links
           router-link(to="/") Home
           router-link(to="/secondpage") secondpage
