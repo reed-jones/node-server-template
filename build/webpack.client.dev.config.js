@@ -1,7 +1,10 @@
 const path = require('path')
+const webpack = require('webpack')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const merge = require('webpack-merge')
+const { VueLoaderPlugin } = require('vue-loader')
+
 const baseConfig = require('./webpack.base.dev.config')
 require('dotenv').config()
 
@@ -11,9 +14,8 @@ let devMode = baseConfig.mode !== 'production'
 // console.log(baseConfig)
 module.exports = merge(baseConfig, {
   entry: [
-    // 'webpack-hot-middleware/client?reload=true&path=__webpack_hmr',
-    'webpack-hot-middleware/client?reload=true',
-    './src/client/index.ts'
+    // 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
+    './src/client/index.js',
   ],
   output: {
     path: path.join(__dirname, '../', 'dist', 'public'),
@@ -22,28 +24,39 @@ module.exports = merge(baseConfig, {
   },
   target: 'web',
   devtool: devMode ? '#source-map' : false,
-  // devServer: {
-  //   contentBase: path.join(__dirname, 'dist'),
-  //   compress: true,
-  //   port: 9000
-  // },
-
-  // devServer: {
-  //   contentBase: path.join(__dirname, 'dist'),
-  //   watchContentBase: true,
-  //   hot: true,
-  // },
-
-  // devServer: {
-  //   contentBase: path.resolve(__dirname, 'src', 'client'),
-  //   publicPath: path.resolve(__dirname, 'dist', 'public'),
-  // },
 
   module: {
     rules: [
       {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: {
+          loaders: {
+            scss: 'vue-style-loader!css-loader!sass-loader',
+            sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax'
+          },
+        },
+      },
+      // {
+      //   test: /\.tsx?$/,
+      //   loader: 'ts-loader',
+      //   exclude: /node_modules/,
+      //   options: {
+      //     appendTsSuffixTo: [/\.vue$/],
+      //   },
+      // },
+      {
         test: /\.tsx?$/,
-        loader: 'babel-loader',
+        use: [
+          {
+            loader: 'babel-loader',
+          }, {
+            loader: 'ts-loader',
+            options: {
+              appendTsSuffixTo: [/\.vue$/],
+            }
+          }
+        ]
       },
       {
         test: /\.js$/,
@@ -70,10 +83,11 @@ module.exports = merge(baseConfig, {
         ],
       },
       {
-        test: /\.styl$/,
+        test: /\.styl(us)?$/,
         use: [
           {
-            loader: devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+            // loader: devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+            loader:'vue-style-loader',
           },
           {
             loader: 'css-loader', // translates CSS into CommonJS
@@ -88,12 +102,15 @@ module.exports = merge(baseConfig, {
       },
       {
         test: /\.pug$/,
-        use: [
+        oneOf: [
+          // this applies to `<template lang="pug">` in Vue components
           {
-            loader: 'raw-loader',
+            resourceQuery: /^\?vue/,
+            use: ['pug-plain-loader'],
           },
+          // this applies to pug imports inside JavaScript
           {
-            loader: 'pug-plain-loader',
+            use: ['raw-loader', 'pug-plain-loader'],
           },
         ],
       },
@@ -109,7 +126,14 @@ module.exports = merge(baseConfig, {
       },
     ],
   },
+  resolve: {
+    extensions: ['.vue', '.ts', '.js', '.json'],
+    alias: {
+      'vue$': 'vue/dist/vue.esm.js'
+    }
+},
   plugins: [
+    new VueLoaderPlugin(),
     new HtmlWebPackPlugin({
       template: './src/client/index.pug',
       filename: 'index.html',
@@ -122,5 +146,6 @@ module.exports = merge(baseConfig, {
       filename: devMode ? '[name].css' : '[name].[hash].css',
       chunkFilename: devMode ? '[id].css' : '[id].[hash].css',
     }),
+  new webpack.NoEmitOnErrorsPlugin()
   ],
 })

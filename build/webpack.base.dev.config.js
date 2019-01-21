@@ -13,8 +13,23 @@ module.exports = {
       '@server': path.resolve(__dirname, '../src/server'),
     },
   },
+
+  // disable terminal logging
+  // stats: 'minimal',
   stats: {
-    // decrease noise in build output
-    children: true,
-  },
+    colors: true,
+    hash: false,
+    version: false,
+    timings: false,
+    assets: true,
+    chunks: false,
+    modules: false,
+    reasons: false,
+    children: false,
+    source: false,
+    errors: true,
+    errorDetails: false,
+    warnings: true,
+    publicPath: false
+  }
 }
