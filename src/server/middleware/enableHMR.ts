@@ -5,7 +5,7 @@ import path from 'path'
 import webpackConfig from '../../../build/webpack.client.dev.config'
 
 export default async (app: Koa<any, {}>) => {
-  const koaMiddleware = await koaWebpack({ config: webpackConfig })
+  const koaMiddleware = await koaWebpack({ config: webpackConfig, hotClient: { logLevel: 'error' } })
 
   const hmrMiddleware = (ctx: Koa.Context, next: () => Promise<any>) => {
     next()

@@ -1,6 +1,9 @@
 module.exports = {
   defaultSeverity: 'error',
-  extends: ['tslint:latest'],
+  extends: [
+    'tslint:latest',
+    "tslint-config-prettier"
+  ],
   jsRules: {},
   rules: {
     semicolon: [true, 'never'],
